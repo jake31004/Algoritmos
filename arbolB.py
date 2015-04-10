@@ -76,25 +76,42 @@ class ABB:
 		aux, padre = self.buscar(ABB, idNodo) #buscamos el nodo que queremos sacar
 
 		if aux is not None: #si el nodo si existe se ejecuta el siguiente codigo
+			
 			if aux.izq == None and aux.der == None: #aux es hoja (no tiene hijos)
-				if padre.izq == aux: #si el nodo es el hijo izquierdo,la referencia izquierda del padre apuntara a None 
+				if aux.padre is None: #el nodo es la raiz
+					aux.izq = aux #hacemos que el nodo apunte a si mismo, para que se cumpla la condicion de ser vacio
+					aux.der = aux
+				elif padre.izq == aux: #si el nodo es el hijo izquierdo,la referencia izquierda del padre apuntara a None 
 					padre.izq = None 
 				else:
 					padre.der = None #si el nodo es el hijo derecho, la referencia derecha del padre apuntara a None
+			
 			elif aux.izq is not None and aux.der is None: #tiene un hijo, y es el izquierdo
-				if padre.izq == aux: #si el nodo es el hijo izquierdo, el padre.izquierdo ahora apuntara al hijo izquierdo del nodo que queremos sacar
+				
+				if aux.padre is None: #el nodo es la raiz
+					self.ABB = aux.izq #ahora el primer nodo es el de la izquierda
+					self.ABB.padre = None #el padre del primer nodo es None
+					aux.izq = aux #quitamos la referencia del hijo izquierdo para que apunte a si mismo
+				elif padre.izq == aux: #si el nodo es el hijo izquierdo, el padre.izquierdo ahora apuntara al hijo izquierdo del nodo que queremos sacar
 					padre.izq = aux.izq
 					aux.izq.padre = padre #el padre del hijo del nodo ahora sera el padre del nodo que sacamos
 				else: #si el nodo es el hijo derecho, el padre.derecho ahora apuntara al hijo izquierdo del nodo que queremos sacar
 					padre.der = aux.izq 
 					aux.izq.padre = padre #el padre del hijo del nodo ahora sera el padre del nodo que sacamos
+			
 			elif aux.izq is None and aux.der is not None: #tiene un hijo y es el derecho
-				if padre.izq == aux: #funciona igual que el elif de arriba, solo que las referencias seran hacia el hijo derecho
+				#funciona igual que el elif de arriba, solo que las referencias seran hacia el hijo derecho
+				if aux.padre is None: #el nodo es la raiz
+					self.ABB = aux.der
+					self.ABB.padre = None
+					aux.der = aux
+				elif padre.izq == aux: 
 					padre.izq = aux.der
 					aux.der.padre = padre
 				else: 
 					padre.der = aux.der
 					aux.der.padre = padre
+			
 			else: #tiene 2 hijos
 				aux2 = Nodo(aux.dato,aux.idNodo) #guardamos la informacion del nodo antes de ser sobreescrita, para poder enviarla
 				aux2.padre = aux.padre 
