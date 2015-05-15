@@ -42,7 +42,7 @@ def insertar(nombre, telefono)
 		agenda.puts nombre+' '+telefono+espacios
 		agenda.close
 
-		$indices_array.push(nombre+' '+linea.to_s)
+		$indices_array.push(array_nombre[0]+' '+linea.to_s)
 		$indices_hash[array_nombre[0]] = linea
 		$indices_eliminados.delete_at(0)
 
