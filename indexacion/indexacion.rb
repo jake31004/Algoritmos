@@ -1,35 +1,31 @@
 #lee los índices dentro del archivo y los guarda en un hash
+#no recibe argumentos
+#crea 3 variables globales: $indices_array, $num_lineas, $indices_hash
 def leerIndices
 	indices_archivo = File.new("indices.txt", 'r')
-	$indices_array = indices_archivo.readlines #leemos líneas del archivo
-	$indices_array = $indices_array.sort #odenamos las líneas alfabéticamente
-	$num_lineas = $indices_array.size #contamos las líneas que tiene el archivo de índices
+	$indices_array = indices_archivo.readlines #leemos líneas del archivo y las guardamos en un arreglo
+	$indices_array = $indices_array.sort #ordenamos las líneas alfabéticamente
+	$num_lineas = $indices_array.size #contamos las líneas que tiene el archivo de índices para saber cuantos contactos tenemos
 
-	$indices_hash = Hash.new
+	$indices_hash = Hash.new #creamos un Hash para guardar los índices, la llave será el apellido y el valor la línea en donde se encuentra en el archivo
 
 	for i in 0...$num_lineas #creando hash de los indices {apellido => linea}
 		aux = $indices_array[i].to_s.split(' ')#dividimos la cadena en apellido(llave) y en numero de bloque(valor)
 		$indices_hash[aux[0]] = aux[1] #ponemos como llave del hash el apellido y como valor el número de bloque
 	end
 
-	indices_archivo.close
+	indices_archivo.close #cerramos el archivo de índices
 end
 
+#lee las líneas en donde se eliminó a un contacto (las líneas vacías dentro de la agenda)
+#no recibe argumentos
+#crea una variable global: $indices_eliminados
 def leerEliminados
-	eliminados_archivo = File.new("eliminados.txt", 'r')
-	$indices_eliminados = eliminados_archivo.readlines
-	num_eliminados = $indices_eliminados.size
+	eliminados_archivo = File.new("eliminados.txt", 'r')#abrimos el archivo de eliminados
+	$indices_eliminados = eliminados_archivo.readlines #leemos sus valores y los agregamos a un arreglo
 
-	eliminados_archivo.close
+	eliminados_archivo.close #cerramos el archivo
 end
-
-# def buscar(apellido)
-# 	if $indices_hash[apellido] == nil
-# 		puts "No existe ese apellido en la agenda"
-# 	else
-# 		linea = $indices_hash[apellido].to_i
-# 	end
-# end
 
 def insertar(nombre, telefono)
 	if $indices_eliminados.length != 0 #si hay algun eliminado
@@ -79,53 +75,53 @@ def insertar(nombre, telefono)
 			$num_lineas += 1 #aumentamos el número de líneas que tiene el archivo
 			#agregamos a la persona al arreglo de índices
 			#Se agrega al arreglo para poder ordenarlo más facilmente
-			$indices_array.push(nombre+' '+$num_lineas.to_s) 
+			$indices_array.push(array_nombre[0]+' '+$num_lineas.to_s) 
 			$indices_hash[array_nombre[0]] = $num_lineas #agregamos a la persona al hash
 		end
 	end
 end
 
 #guarda los índices del hash dentro del archivo de índices
+#no recibe argumentos
+#utiliza una variable global: $indices_array
 def guardarIndices
-	$indices_array.sort!
+	$indices_array.sort! #ordena el arreglo que contiene las llaves y los índices
 
-	archivo_indices = File.new("indices.txt", "w")
+	archivo_indices = File.new("indices.txt", "w") #abre el archivo de indices en modo escritura (sobreescribir)
 
-	$indices_array.each do |a|
-		aux = a.split(' ')
-		archivo_indices.puts aux.first+' '+aux.last 
+	$indices_array.each do |a| #agregamos cada elemento del arreglo al archivo
+		archivo_indices.puts a 
 	end
 
-	archivo_indices.close
+	archivo_indices.close #cerramos el archivo de indices
 end
 
 #regresa los espacios necesarios que se tienen que agregar
-#para que todas las cadenas sean de tamaño 80
+#para que todas las cadenas sean de tamaño 81 (por el salto de linea)
 def agregarEspacios(tam_nombre,tam_telefono) 
+	#calculamos el número total de espacios que necesitamos
+	num_espacios = 80 - (tam_nombre + tam_telefono) 
+	espacios = ' '*(num_espacios-1)#creamos la cadena con los espacios necesarios, a num_espacios le quitamos uno para que la cadena final sea de 81
 
-	num_espacios = 80 - (tam_nombre + tam_telefono)
-	espacios = ''
-
-	for i in 1...num_espacios 
-		espacios += ' '
-	end
-
-	return espacios
+	return espacios #regresamos la cadena
 end
 
 #hace una busqueda por hash de la persona
+#recibe el apellido a buscar
+#regresa a la persona buscada (nombre completo y telefono)
 def buscar(apellido)
-	apellido.upcase!
-	if $indices_hash[apellido] == nil
+	apellido.upcase! #pasamos el apellido a mayúsculas porque así se metieron las llaves en el hash
+	if $indices_hash[apellido] == nil #si el apellido no está en el hash se manda un mensaje de error
 		puts "El contacto no existe"
+		return nil #regresamos nil porque no se encontró a la persona
 	else
-		linea = $indices_hash[apellido].to_i
-		contactos = File.new("agenda.txt")
-		contactos.rewind
-		contactos.seek(81*(linea-1), IO::SEEK_SET)
-		persona = contactos.readline
-		puts persona
-		contactos.close
+		linea = $indices_hash[apellido].to_i #leemos la línea en la que se encuentra el contacto dentro de la agenda
+		contactos = File.new("agenda.txt") #abrimos la agenda 
+		contactos.seek(81*(linea-1), IO::SEEK_SET) #nos ponemos en la línea donde se encuentra el contacto
+		persona = contactos.readline #leemos la línea
+		puts persona #imprimimos la info del contacto
+		contactos.close #cerramos el archivo de la agenda
+		return persona #regresamos a la persona
 	end
 end
 
@@ -196,6 +192,7 @@ while true do
 		puts "guardar 			Guarda un contacto"
 		puts "buscar 			Busca la información de un contacto en especifico"	
 		puts "leerIndices 		Muestra los indices con su llave {apellido indice}"
+		puts "eliminar 			Elimina a un contacto de la agenda"
 		puts "bye 				Sale del programa"
 	when "bye"
 		puts "Adios"
